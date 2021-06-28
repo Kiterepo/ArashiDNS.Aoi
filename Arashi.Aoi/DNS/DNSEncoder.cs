@@ -29,6 +29,7 @@ namespace Arashi
             dnsMsg.IsRecursionAllowed = true;
             dnsMsg.IsRecursionDesired = true;
             dnsMsg.IsQuery = false;
+            //if (dnsMsg.ReturnCode != ReturnCode.NoError || dnsMsg.AnswerRecords.Count == 0) 
             dnsMsg.TransactionID = 0;
             dnsMsg.IsEDnsEnabled = false;
             dnsMsg.AdditionalRecords.Clear();
@@ -54,7 +55,7 @@ namespace Arashi
                 else
                     break;
             }
-
+            //list.Add(0x00);
             return list.ToArray();
         }
 
