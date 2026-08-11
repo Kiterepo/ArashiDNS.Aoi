@@ -37,6 +37,7 @@ namespace Arashi
         public bool RateLimitingEnable = true;
         public bool AnyTypeEnable = false;
         public bool RetellEcsEnable = true;
+        public bool KeepEcsEnable = false;
         public string AdminToken = Guid.NewGuid().ToString();
         public string MaxmindCityDbUrl = "https://github.com/mili-tan/maxmind-geoip/releases/latest/download/GeoLite2-City.mmdb";
         public string MaxmindAsnDbUrl = "https://github.com/mili-tan/maxmind-geoip/releases/latest/download/GeoLite2-ASN.mmdb";

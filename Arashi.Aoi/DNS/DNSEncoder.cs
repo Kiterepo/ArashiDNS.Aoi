@@ -9,14 +9,20 @@ namespace Arashi
     {
 
         public static byte[] Encode(DnsMessage dnsMsg, bool transIdEnable = false, bool trimEnable = false,
-            ushort id = 0)
+            ushort id = 0, bool keepEcs = false)
         {
             dnsMsg.IsRecursionAllowed = true;
             dnsMsg.IsRecursionDesired = true;
             dnsMsg.IsQuery = false;
             dnsMsg.IsEDnsEnabled = false;
-            dnsMsg.EDnsOptions?.Options?.Clear();
-            dnsMsg.AdditionalRecords?.Clear();
+            if (keepEcs)
+                dnsMsg.EDnsOptions?.Options.RemoveAll(x => x.Type != EDnsOptionType.ClientSubnet);
+            else
+            {
+                dnsMsg.EDnsOptions?.Options?.Clear();
+                dnsMsg.AdditionalRecords?.Clear();
+            }
+
 
             if (id != 0) dnsMsg.TransactionID = id;
             if (!transIdEnable) dnsMsg.TransactionID = 0;

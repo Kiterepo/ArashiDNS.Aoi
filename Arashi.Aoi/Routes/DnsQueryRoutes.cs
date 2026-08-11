@@ -253,7 +253,7 @@ namespace Arashi.Aoi.Routes
 
                 if (returnMsg)
                     await context.WriteResponseAsync(
-                        DnsEncoder.Encode(aMsg, transIdEnable, trimEnable, id),
+                        DnsEncoder.Encode(aMsg, transIdEnable, trimEnable, id, Config.KeepEcsEnable),
                         type: "application/dns-message");
                 else
                     await context.WriteResponseAsync(
