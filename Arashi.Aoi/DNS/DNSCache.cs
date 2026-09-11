@@ -6,6 +6,7 @@ using System.Runtime.Caching;
 using ARSoft.Tools.Net;
 using ARSoft.Tools.Net.Dns;
 using Microsoft.AspNetCore.Http;
+using static Arashi.AoiConfig;
 
 namespace Arashi
 {
@@ -30,7 +31,8 @@ namespace Arashi
                     AuthorityRecords = dnsMessage.AuthorityRecords.Where(x => x.RecordType != RecordType.Txt).ToList(),
                     Code = dnsMessage.ReturnCode,
                     Time = DateTime.Now,
-                    ExpiresTime = DateTime.Now.AddSeconds(ttl)
+                    ExpiresTime = DateTime.Now.AddSeconds(ttl),
+                    ECS = Config.KeepEcsEnable ? RealIP.GetFromDns(dnsMessage) : null
                 }), ttl);
         }
 
@@ -43,8 +45,8 @@ namespace Arashi
 
             var ttl = dnsMessage.AnswerRecords.Select(x => x.TimeToLive).Min();
             if (record.TimeToLive < 10) return;
-            if (record.TimeToLive >= AoiConfig.Config.MaxTTL)
-                ttl = AoiConfig.Config.TargetTTL;
+            if (record.TimeToLive >= Config.MaxTTL)
+                ttl = Config.TargetTTL;
 
             if (RealIP.TryGetFromDns(dnsMessage, out var ipAddress))
                 AddForce(new CacheItem(
@@ -56,7 +58,8 @@ namespace Arashi
                             .ToList(),
                         Code = dnsMessage.ReturnCode,
                         Time = DateTime.Now,
-                        ExpiresTime = DateTime.Now.AddSeconds(ttl)
+                        ExpiresTime = DateTime.Now.AddSeconds(ttl),
+                        ECS = Config.KeepEcsEnable ? RealIP.GetFromDns(dnsMessage) : null
                     }), ttl);
             else
                 AddForce(new CacheItem(
@@ -68,7 +71,8 @@ namespace Arashi
                             .ToList(),
                         Code = dnsMessage.ReturnCode,
                         Time = DateTime.Now,
-                        ExpiresTime = DateTime.Now.AddSeconds(ttl)
+                        ExpiresTime = DateTime.Now.AddSeconds(ttl),
+                        ECS = Config.KeepEcsEnable ? RealIP.GetFromDns(dnsMessage) : null
                     }), ttl);
         }
 
@@ -189,6 +193,15 @@ namespace Arashi
             dCacheMsg.Questions.AddRange(dnsQMessage.Questions);
             dCacheMsg.AuthorityRecords.Add(new TxtRecord(DomainName.Parse("cache.arashi-msg"), 0,
                 cacheEntity.ExpiresTime.ToString("r")));
+
+            if (Config.KeepEcsEnable && cacheEntity.ECS != null &&
+                !Equals(cacheEntity.ECS, IPAddress.Any) && !IPAddress.IsLoopback(cacheEntity.ECS))
+            {
+                dCacheMsg.IsEDnsEnabled = true;
+                dCacheMsg.EDnsOptions ??= new OptRecord();
+                dCacheMsg.EDnsOptions.Options.Add(new ClientSubnetOption(Config.EcsDefaultMask, cacheEntity.ECS));
+            }
+
             return dCacheMsg;
         }
 
@@ -205,6 +218,7 @@ namespace Arashi
             public ReturnCode Code;
             public DateTime Time;
             public DateTime ExpiresTime;
+            public IPAddress? ECS;
         }
     }
 }
