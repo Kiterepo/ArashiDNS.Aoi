@@ -20,9 +20,9 @@ namespace Arashi
             var quest = dnsMessage.Questions.First();
 
             var ttl = dnsMessage.AnswerRecords.Select(x => x.TimeToLive).Min();
-            if (record.TimeToLive < AoiConfig.Config.MinTTL) return;
-            if (record.TimeToLive >= AoiConfig.Config.MaxTTL)
-                ttl = AoiConfig.Config.TargetTTL;
+            if (record.TimeToLive < Config.MinTTL) return;
+            if (record.TimeToLive >= Config.MaxTTL)
+                ttl = Config.TargetTTL;
 
             AddForce(new CacheItem($"DNS:{quest.Name.ToString().ToLower()}:{quest.RecordType}:{tag}",
                 new CacheEntity
